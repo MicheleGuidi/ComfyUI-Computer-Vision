@@ -97,7 +97,7 @@ Also used for the alternative node:
 
 You can install this extension in two ways:
 
-- **Via ComfyUI Manager**: Search for `ComfyUI-SAM2-ContextFlorence` and install directly.
+- **Via ComfyUI Manager**: Search for `ComfyUI-Computer-Vision` and install directly.
 - **Manual Clone**: Clone or download this repository into your `ComfyUI/custom_nodes/` folder.
 
 After restarting ComfyUI, the nodes `Sam2ContextSegmentation` and `Sam2TiledSegmentation` will appear and be ready to use.
