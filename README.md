@@ -127,3 +127,6 @@ Thanks to the following open-source projects for their valuable contributions:
 - [Segment Anything 2](https://github.com/facebookresearch/segment-anything)
 - [SAHI](https://github.com/obss/sahi)
 - [ComfyUI Segment Anything 2 (Kijai)](https://github.com/kijai/ComfyUI-segment-anything-2)
+
+
+Images include content sourced from [federgolf.it](https://www.federgolf.it) and a frame from a UEFA Champions League 2010 broadcast.
