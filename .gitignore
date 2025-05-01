@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# ComfyUI
+comfyui/*.db
+comfyui/.venv/
+
+# Temporary files
+*.log
+*.bak
+*.swp
+*.swo
+
+# Visual Studio Code settings
+.vscode/
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Node modules (in case you use Node.js for any front-end)
+node_modules/
+
+# System-specific
+.DS_Store
+Thumbs.db
+
+# IDE specific
+.idea/
+*.iml
+
+# Python environment (if not using a virtualenv)
+env/
+venv/
+
+# Zip and RAR files
+*.zip
+*.rar
