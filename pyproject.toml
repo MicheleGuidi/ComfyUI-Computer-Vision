@@ -1,14 +1,15 @@
 [project]
-name = ""
-description = ""
+name = "computer-vision"
+description = "Nodes for computer vision in ComfyUI. Currently just an enhancement of [a/Segment-Anything-2](https://github.com/facebookresearch/segment-anything-2) nodes from [a/Kijai](https://github.com/kijai/ComfyUI-segment-anything-2)."
 version = "1.0.0"
-license = "LICENSE"
+license = {file = "LICENSE"}
+dependencies = ["sahi>=0.11.0"]
 
 [project.urls]
-Repository = ""
+Repository = "https://github.com/MicheleGuidi/comfyui-computer-vision"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
-DisplayName = "ComfyUI-AIT"
+PublisherId = "micheleguidi"
+DisplayName = "comfyui-computer-vision"
 Icon = ""

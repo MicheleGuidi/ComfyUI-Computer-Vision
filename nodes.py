@@ -13,13 +13,9 @@ from matplotlib.colors import TABLEAU_COLORS as colormap
 from tqdm import tqdm
 from contextlib import nullcontext
 
-from .load_model import load_model
-
 import comfy.model_management as mm
 from comfy.utils import ProgressBar, common_upscale
 import folder_paths
-
-script_directory = os.path.dirname(os.path.abspath(__file__))
 
 def sam2_segment_helper(image, sam2_model, keep_model_loaded, coordinates_positive=None, coordinates_negative=None, 
                 individual_objects=False, bboxes=None, mask=None):
@@ -688,7 +684,7 @@ class Sam2TiledSegmentation:
 
         return (final_mask, tiles_tensor, tile_bboxes_tensor, annotated_image_tensor, masked_tiles_tensor,)
      
-class Sam2BboxTiledSegmentation:
+class Sam2ContextSegmentation:
     @classmethod
     def INPUT_TYPES(s):
         """
@@ -710,19 +706,23 @@ class Sam2BboxTiledSegmentation:
                     "default": False,
                     "description": "Force context to be square using the longest side"
                 }),
+                "limit_tile_size": ("BOOLEAN", {
+                    "default": True,
+                    "description": "Enable/disable maximum tile size limit"
+                }),
                 "max_tile_size": ("INT", {
                     "default": 1024,
                     "min": 256,
                     "max": 2048,
                     "step": 128,
-                    "description": "Maximum tile size"
+                    "description": "Maximum tile size (when limit is enabled)"
                 }),
                 "mask_filter_mode": (["disabled", "absolute", "percentage"], {
                     "default": "disabled",
                     "description": "Method to filter out small mask components"
                 }),
                 "min_mask_area": ("INT", {
-                    "default": 100,
+                    "default": 20,
                     "min": 0,
                     "max": 10000,
                     "step": 10,
@@ -770,7 +770,7 @@ class Sam2BboxTiledSegmentation:
     FUNCTION = "segment"
     CATEGORY = "SAM2"
 
-    def calculate_context_tile(self, bbox, context_scale, image_size, max_tile_size, force_square_context):
+    def calculate_context_tile(self, bbox, context_scale, image_size, max_tile_size, force_square_context, limit_tile_size):
         # Calculate bbox center
         center_x = (bbox[0] + bbox[2]) / 2
         center_y = (bbox[1] + bbox[3]) / 2
@@ -782,7 +782,7 @@ class Sam2BboxTiledSegmentation:
         if force_square_context:
             # Use the longer side as reference to create a square tile
             base_size = max(width, height)
-            context_size = min(base_size * context_scale, max_tile_size)
+            context_size = base_size * context_scale if not limit_tile_size else min(base_size * context_scale, max_tile_size)
             half_size = context_size / 2
             
             tile_x1 = max(0, center_x - half_size)
@@ -791,8 +791,8 @@ class Sam2BboxTiledSegmentation:
             tile_y2 = min(image_size[0], center_y + half_size)
         else:
             # Maintain original bbox proportions
-            context_width = min(width * context_scale, max_tile_size)
-            context_height = min(height * context_scale, max_tile_size)
+            context_width = width * context_scale if not limit_tile_size else min(width * context_scale, max_tile_size)
+            context_height = height * context_scale if not limit_tile_size else min(height * context_scale, max_tile_size)
             
             half_width = context_width / 2
             half_height = context_height / 2
@@ -956,13 +956,16 @@ class Sam2BboxTiledSegmentation:
         return closed_mask
 
     def segment(self, image, sam2_model, context_scale, force_square_context,
-                max_tile_size, mask_filter_mode, min_mask_area, min_mask_area_percent,
+                limit_tile_size, max_tile_size, mask_filter_mode, min_mask_area, min_mask_area_percent,
                 fill_individual_masks, close_mask_gaps, dilate_masks, keep_model_loaded, mask_opacity,
                 coordinates_positive=None, coordinates_negative=None, bboxes=None,
                 individual_objects=False, mask=None):
         
         print(f"DEBUG: Starting segmentation with {len(bboxes) if bboxes else 0} bounding boxes")
         print(f"DEBUG: Image dimensions: {image.shape}")
+        print(f"DEBUG: Tile size limit {'enabled' if limit_tile_size else 'disabled'}")
+        if limit_tile_size:
+            print(f"DEBUG: Maximum tile size: {max_tile_size}")
 
         if bboxes is None or len(bboxes) == 0:
             print("No bounding boxes provided")
@@ -1020,7 +1023,7 @@ class Sam2BboxTiledSegmentation:
             
             # Calculate tile for this specific bbox
             tile_bbox = self.calculate_context_tile(
-                bbox, context_scale, image.shape[1:], max_tile_size, force_square_context
+                bbox, context_scale, image.shape[1:], max_tile_size, force_square_context, limit_tile_size
             )
             x1, y1, x2, y2 = tile_bbox
             
@@ -1085,17 +1088,12 @@ class Sam2BboxTiledSegmentation:
                         )
 
                         if removed_components.sum() > 0:
-                            # Create colored mask for removed components (in blue)
-                            removed_overlay = torch.zeros((1, y2-y1, x2-x1, 3), dtype=torch.float32)
-                            removed_overlay[..., 2] = 1.0  # Blue for removed components
-                            
-                            # Apply opacity
-                            mask_overlay = removed_components.unsqueeze(-1).expand(-1, -1, 3) * mask_opacity
-                                
-                            # Update removed components visualization in correct position
+                            # Create a mask with very small non-zero values for R and G channels
+                            # This prevents numerical issues while keeping the color visually blue
+                            removed_mask = removed_components.unsqueeze(-1).expand(-1, -1, 3)
                             removed_components_vis[0, y1:y2, x1:x2] = torch.where(
-                                mask_overlay > 0,
-                                removed_overlay[0],
+                                removed_mask > 0,
+                                torch.tensor([1e-7, 1e-7, 1.0], dtype=torch.float32),
                                 removed_components_vis[0, y1:y2, x1:x2]
                             )
 
@@ -1203,7 +1201,7 @@ class Sam2BboxTiledSegmentation:
         # Create tensor for bounding boxes
         tile_bboxes_tensor = torch.tensor(bboxes, dtype=torch.float32)
 
-        # Combine removed components with original image
+        # Combine removed components with original image using opacity
         final_removed_components = torch.where(
             removed_components_vis > 0,
             removed_components_vis * mask_opacity + image * (1 - mask_opacity),
@@ -1221,9 +1219,9 @@ class Sam2BboxTiledSegmentation:
      
 NODE_CLASS_MAPPINGS = {
     "Sam2TiledSegmentation": Sam2TiledSegmentation,
-    "Sam2BboxTiledSegmentation": Sam2BboxTiledSegmentation
+    "Sam2ContextSegmentation": Sam2ContextSegmentation
 }
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Sam2TiledSegmentation": "Sam2TiledSegmentation",
-    "Sam2BboxTiledSegmentation": "Sam2BboxTiledSegmentation"
+    "Sam2ContextSegmentation": "Sam2ContextSegmentation"
 }
