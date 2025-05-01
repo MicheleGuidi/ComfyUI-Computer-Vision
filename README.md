@@ -12,10 +12,11 @@ While SAM2's large model performs well on general objects, it exhibits a tendenc
 
 In this study, we tested the segmentation performance using various approaches:
 
-1. **Large SAM2.1**: The base large model, known for its higher capacity, but prone to errors when small objects are present.
-2. **Base+ SAM2.1**: An alternative model that balances computational efficiency and segmentation quality by offering a more streamlined approach, often without needing extensive context processing.
-3. **Context-Based Segmentation**: This approach crops the input image around each bounding box, ensuring that the SAM2 model processes only the target object, potentially improving accuracy for small objects.
-4. **Tiled Segmentation**: A tiling-based approach that slices the image into smaller sections to avoid performance degradation but without focusing on the context of specific objects.
+1. **Context-Based Segmentation**: This approach crops the input image around each bounding box, ensuring that the SAM2 model processes only the target object, potentially improving accuracy for small objects.
+2. **Tiled Segmentation**: A tiling-based approach that slices the image into smaller sections to avoid performance degradation but without focusing on the context of specific objects.
+3. **Large SAM2.1**: The base large model, known for its higher capacity, but prone to errors when small objects are present.
+4. **Base+ SAM2.1**: An alternative model that balances computational efficiency and segmentation quality by offering a more streamlined approach, often without needing extensive context processing.
+5. **Small SAM2.1**: A version of the SAM2 model with fewer parameters, optimized for faster processing and lower computational demands. While it performs better on small objects and fine details, it may struggle with larger or more complex scenes due to its reduced capacity compared to the large model.
 
 The testing was conducted using a set of objects such as golf balls, golf clubs, human faces, and various combinations of items (e.g., shoes, hands, pants).
 
@@ -119,10 +120,7 @@ For researchers or developers interested in experimenting with these models, the
 
 ## Installation
 
-You can install this extension in two ways:
-
-- **Via ComfyUI Manager**: Search for `ComfyUI-Computer-Vision` and install directly.
-- **Manual Clone**: Clone or download this repository into your `ComfyUI/custom_nodes/` folder.
+To install these custom nodes, clone or download this repository into your `ComfyUI/custom_nodes/` folder.
 
 After restarting ComfyUI, the nodes `Sam2ContextSegmentation` and `Sam2TiledSegmentation` will appear and be ready to use.
 
