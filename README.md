@@ -97,7 +97,7 @@ Also used for the alternative node:
 
 You can install this extension in two ways:
 
-- **Via ComfyUI Manager**: Search for `ComfyUI-SAM2-ContextFlorence` and install directly.
+- **Via ComfyUI Manager**: Search for `ComfyUI-Computer-Vision` and install directly.
 - **Manual Clone**: Clone or download this repository into your `ComfyUI/custom_nodes/` folder.
 
 After restarting ComfyUI, the nodes `Sam2ContextSegmentation` and `Sam2TiledSegmentation` will appear and be ready to use.
@@ -115,11 +115,7 @@ A complete example workflow is included in the `workflows` folder to demonstrate
 🚧 **In development**
 - Integration of Florence2 node with contextual logic
 - Creation of mask management nodes
-
-🧭 **Under evaluation**
-- Merge with original `ComfyUI-segment-anything-2` nodes
-- Run Florence models locally (ONNX)
-- Text-prompt guided segmentation
+- Further computer vision nodes development
 
 ---
 
@@ -131,3 +127,6 @@ Thanks to the following open-source projects for their valuable contributions:
 - [Segment Anything 2](https://github.com/facebookresearch/segment-anything)
 - [SAHI](https://github.com/obss/sahi)
 - [ComfyUI Segment Anything 2 (Kijai)](https://github.com/kijai/ComfyUI-segment-anything-2)
+
+
+Images include content sourced from [federgolf.it](https://www.federgolf.it) and a frame from a UEFA Champions League 2010 broadcast.
