@@ -1,24 +1,22 @@
-# Processo Context
+### Processo Context
 
-Confronto tra le diverse fasi del processo di segmentazione.
-
-| Passaggio            | Immagine           |
-|----------------------|--------------------|
-| Original Image       | ![][orig_img]      |
-| Florence Bounding Boxes | ![][florence_bboxes] |
-| Context Tiles        | ![][context_tiles] |
-| Colored Masks        | ![][colored_masks] |
-| Cleaned Mask         | ![][cleaned_mask]  |
-| Final Mask           | ![][final_mask]    |
+| Passaggio                | Descrizione                                                                 | Immagine               |
+|--------------------------|-----------------------------------------------------------------------------|------------------------|
+| Original Image           | Immagine originale da segmentare                                           | ![][orig_img]          |
+| Florence Bounding Boxes  | Output del modello Florence con bounding box disegnate                     | ![][florence_bboxes]   |
+| Context Tiles            | Suddivisione dell'immagine in tile contestuali per l'elaborazione          | ![][context_tiles]     |
+| Colored Masks            | Maschere colorate sovrapposte per ogni oggetto riconosciuto                | ![][colored_masks]     |
+| Cleaned Mask             | Maschera pulita con oggetti aggregati e rumore rimosso                     | ![][cleaned_mask]      |
+| Final Mask               | Maschera finale pronta per l'utilizzo nel processo successivo              | ![][final_mask]        |
 
 <!-- Alias immagini -->
 
-[orig_img]: test_images/context_process/1_original%20image.png
-[florence_bboxes]: test_images/context_process/1_florence%20bounding%20boxes.png
-[context_tiles]: test_images/context_process/1_context%20tiles.png
-[colored_masks]: test_images/context_process/1_colored%20masks.png
-[cleaned_mask]: test_images/context_process/1_cleaned%20mask.png
-[final_mask]: test_images/context_process/1_final%20mask.png
+[orig_img]: test_images/context_process/original%20image.jpg
+[florence_bboxes]: test_images/context_process/florence%20bounding%20boxes.jpg
+[context_tiles]: test_images/context_process/context%20tiles.jpg
+[colored_masks]: test_images/context_process/colored%20masks.jpg
+[cleaned_mask]: test_images/context_process/cleaned%20mask.jpg
+[final_mask]: test_images/context_process/final%20mask.jpg
 
 # Risultati dei test
 
