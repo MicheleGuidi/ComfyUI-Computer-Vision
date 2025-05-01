@@ -79,12 +79,6 @@ The evaluation suggests that while context-based segmentation models can enhance
 
 For researchers or developers interested in experimenting with these models, the context-based approach can still offer benefits in specific cases where detailed object isolation is crucial. However, in most practical applications, **Base+** may be the preferred model for achieving high-quality segmentation without the added complexity of context processing.
 
-## Future Work
-
-- Further testing with diverse object categories and real-world scenarios.
-- Investigation into additional optimizations for **Base+** to further improve its performance.
-- Exploring hybrid models that combine context-aware processing with the efficiency of **Base+**.
-
 ---
 
 ## Available Nodes
@@ -125,19 +119,6 @@ To install these custom nodes, clone or download this repository into your `Comf
 After restarting ComfyUI, the nodes `Sam2ContextSegmentation` and `Sam2TiledSegmentation` will appear and be ready to use.
 
 A complete example workflow is included in the `workflows` folder to demonstrate how to use the context-based segmentation effectively.
-
----
-
-## Roadmap
-
-✔️ **Completed**
-- Contextual segmentation with automatic crops centered on the bounding box
-- Mask cleanup (merging, noise removal)
-
-🚧 **In development**
-- Integration of Florence2 node with contextual logic
-- Creation of mask management nodes
-- Further computer vision nodes development
 
 ---
 
