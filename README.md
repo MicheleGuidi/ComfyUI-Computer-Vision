@@ -115,11 +115,7 @@ A complete example workflow is included in the `workflows` folder to demonstrate
 🚧 **In development**
 - Integration of Florence2 node with contextual logic
 - Creation of mask management nodes
-
-🧭 **Under evaluation**
-- Merge with original `ComfyUI-segment-anything-2` nodes
-- Run Florence models locally (ONNX)
-- Text-prompt guided segmentation
+- Further computer vision nodes development
 
 ---
 
