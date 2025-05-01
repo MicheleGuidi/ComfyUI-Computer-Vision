@@ -765,8 +765,8 @@ class Sam2ContextSegmentation:
             },
         }
     
-    RETURN_TYPES = ("MASK", "BBOX", "IMAGE", "IMAGE", "IMAGE")
-    RETURN_NAMES = ("mask", "tile_bboxes", "annotated_image", "removed_components", "colored_masks")
+    RETURN_TYPES = ("MASK", "BBOX", "IMAGE", "MASK", "IMAGE")
+    RETURN_NAMES = ("mask", "tile_bboxes", "annotated_image", "cleaned_mask", "colored_masks")
     FUNCTION = "segment"
     CATEGORY = "SAM2"
 
@@ -972,12 +972,12 @@ class Sam2ContextSegmentation:
             return (torch.zeros((image.shape[1], image.shape[2]), dtype=torch.float32),
                     torch.zeros((1, 4), dtype=torch.float32),
                     torch.zeros_like(image),
-                    torch.zeros_like(image),
+                    torch.zeros((image.shape[1], image.shape[2]), dtype=torch.float32),
                     torch.zeros_like(image))
 
         # Initialize final mask and removed components visualization
         final_mask = torch.zeros((1, image.shape[1], image.shape[2]), dtype=torch.float32)
-        removed_components_vis = torch.zeros((1, image.shape[1], image.shape[2], 3), dtype=torch.float32)
+        removed_components_mask = torch.zeros((image.shape[1], image.shape[2]), dtype=torch.float32)
         
         # Initialize image for colored masks
         colored_masks = torch.zeros((1, image.shape[1], image.shape[2], 3), dtype=torch.float32)
@@ -1088,14 +1088,13 @@ class Sam2ContextSegmentation:
                         )
 
                         if removed_components.sum() > 0:
-                            # Create a mask with very small non-zero values for R and G channels
-                            # This prevents numerical issues while keeping the color visually blue
-                            removed_mask = removed_components.unsqueeze(-1).expand(-1, -1, 3)
-                            removed_components_vis[0, y1:y2, x1:x2] = torch.where(
-                                removed_mask > 0,
-                                torch.tensor([1e-7, 1e-7, 1.0], dtype=torch.float32),
-                                removed_components_vis[0, y1:y2, x1:x2]
-                            )
+                            # Update the binary mask of removed components
+                            if len(removed_components.shape) == 3:
+                                removed_components = removed_components[0]
+                            removed_components_mask[y1:y2, x1:x2] = torch.logical_or(
+                                removed_components_mask[y1:y2, x1:x2],
+                                removed_components
+                            ).float()
 
                     # Dilate mask if requested
                     if dilate_masks > 0:
@@ -1201,21 +1200,14 @@ class Sam2ContextSegmentation:
         # Create tensor for bounding boxes
         tile_bboxes_tensor = torch.tensor(bboxes, dtype=torch.float32)
 
-        # Combine removed components with original image using opacity
-        final_removed_components = torch.where(
-            removed_components_vis > 0,
-            removed_components_vis * mask_opacity + image * (1 - mask_opacity),
-            image
-        )
-
         print("\nFinal results:")
         print(f"Final mask shape: {final_mask.shape}")
         print(f"Tile bboxes shape: {tile_bboxes_tensor.shape}")
         print(f"Annotated image shape: {annotated_image_tensor.shape}")
         print(f"Colored masks shape: {colored_masks.shape}")
-        print(f"Removed components shape: {removed_components_vis.shape}")
+        print(f"Cleaned mask shape: {removed_components_mask.shape}")
 
-        return (final_mask, tile_bboxes_tensor, annotated_image_tensor, final_removed_components, final_colored_masks)
+        return (final_mask, tile_bboxes_tensor, annotated_image_tensor, removed_components_mask, final_colored_masks)
      
 NODE_CLASS_MAPPINGS = {
     "Sam2TiledSegmentation": Sam2TiledSegmentation,
